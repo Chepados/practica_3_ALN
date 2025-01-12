@@ -1,13 +1,16 @@
 from abc import ABC, abstractmethod
 from random import choice, random
 from time import sleep
-import os
+from IPython.display import clear_output
+from os import system
+import pygame
+from pygame.locals import QUIT, KEYDOWN, K_UP, K_DOWN, K_LEFT, K_RIGHT
 
-import subprocess
+
 
 def clear_console():
-    subprocess.run("cls" if os.name == "nt" else "clear", shell=True)
-
+    clear_output(wait=True)
+    system('cls')
 
 class Game_state:
     ## Class to represent the state of the game
@@ -19,28 +22,36 @@ class Game_state:
         self.is_game_over = False
 
     def generate_food(self):
-        x = int(random() * self.shape[0])
-        y = int(random() * self.shape[1])
-        return (x, y)
+        # añade commida eligiendo al azar una posicion valida no puedo haber comida ni tampoco serpiente
+
+        posibles_posiciones = []
+
+        for i in range(self.shape[0]):
+            for j in range(self.shape[1]):
+                if (i, j) not in self.snake and (i, j) not in self.food_list:
+                    posibles_posiciones.append((i, j))
+
+        return choice(posibles_posiciones)
 
     def generate_food_list(self):
-        food_list = set()
-        while len(food_list) < self.n_food:
-            food_list.add(self.generate_food())
-        return food_list
+        self.food_list = set()
+        while len(self.food_list) < self.n_food:
+            self.food_list.add(self.generate_food())
 
     def update_food_list(self):
         # Hay ue tener en cuenta que la comida no puede estar en la serpiente, que no puede estar en la misma posición que otra comida y ue el juego se puede acabar
 
         while len(self.food_list) < self.n_food:
+
             self.food_list.add(self.generate_food())
+
 
     def reset(self):
 
 
         self.snake = [(0, 0)]
         self.direction = (1, 0)
-        self.food_list = self.generate_food_list()
+        self.generate_food_list()
 
     def __str__(self):
         dic_elementos = {
@@ -196,16 +207,48 @@ class Snake_game:
             self.state.update(action)   # Actualizamos el estado del juego
             if self.state.is_game_over:
                 break
+
             sleep(0.1)
             clear_console()
 
+    def play_with_pygame(self):
+        pygame.init()
+        cell_size = 20
+        screen = pygame.display.set_mode((self.state.shape[1] * cell_size, self.state.shape[0] * cell_size))
+        clock = pygame.time.Clock()
 
+        while not self.state.is_game_over:
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    return
+                elif event.type == KEYDOWN:
+                    if event.key == K_UP:
+                        self.state.update((-1, 0))
+                    elif event.key == K_DOWN:
+                        self.state.update((1, 0))
+                    elif event.key == K_LEFT:
+                        self.state.update((0, -1))
+                    elif event.key == K_RIGHT:
+                        self.state.update((0, 1))
 
+            action = self.agent.get_action(self.state)
+            self.state.update(action)
+
+            screen.fill((0, 0, 0))
+            for segment in self.state.snake:
+                pygame.draw.rect(screen, (0, 255, 0), (segment[1] * cell_size, segment[0] * cell_size, cell_size, cell_size))
+            for food in self.state.food_list:
+                pygame.draw.rect(screen, (255, 0, 0), (food[1] * cell_size, food[0] * cell_size, cell_size, cell_size))
+
+            pygame.display.flip()
+            clock.tick(10)
+
+        pygame.quit()
 
 
 if __name__ == '__main__':
     agent = ChasserAgent()
     game = Snake_game((15, 15), 5, agent)
-    game.play()
-
+    game.play_with_pygame()
 
