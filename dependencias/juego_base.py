@@ -1,13 +1,12 @@
 from abc import ABC, abstractmethod
 from random import choice, random
 from time import sleep
-
 import numpy as np
 from IPython.display import clear_output
 from os import system
 import pygame
 from pygame.locals import QUIT
-import Agentes
+
 
 
 def clear_console():

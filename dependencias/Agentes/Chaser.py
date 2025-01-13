@@ -1,10 +1,9 @@
-from .Base_Agent import Agent
-from ..juego_base import Game_state
+from dependencias.Agentes.Base_Agent import Agent
 
 class ChaserAgent(Agent):
     ## Agent that tries to catch the food as soon as possible
 
-    def get_action(self, state : Game_state):
+    def get_action(self, state):
         POSIBLE_ACTIONS = [(0, 1), (0, -1), (1, 0), (-1, 0)]
         head = state.snake[0]
 
