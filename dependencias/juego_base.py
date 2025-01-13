@@ -208,10 +208,3 @@ class Snake_game:
 
         pygame.quit()
 
-
-if __name__ == '__main__':
-    agent = Agentes.ChaserAgent()
-    game = Snake_game((15, 15), 5, agent)
-    game.play_with_pygame()
-
-
