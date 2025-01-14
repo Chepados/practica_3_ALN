@@ -6,6 +6,7 @@ from IPython.display import clear_output
 from os import system
 import pygame
 from pygame.locals import QUIT
+from tqdm import tqdm
 
 
 
@@ -59,6 +60,8 @@ class Game_state:
         self.direction = (1, 0)
         self.food_list = set()
         self.update_food_list()
+        self.is_game_over = False
+        self.n_moviminetos = 0
 
     def __str__(self):
         dic_elementos = {
@@ -88,9 +91,6 @@ class Game_state:
     def game_over(self):
 
         # Tiene que devolver toda la chicha
-
-        print('Game Over')
-        print('Score: ', len(self.snake))
         self.is_game_over = True
 
         estadisticas = {
@@ -208,3 +208,26 @@ class Snake_game:
 
         pygame.quit()
 
+    def evaluar(self, n_partidas=100):
+        puntuaciones = []
+        movimientos = []
+        for _ in tqdm(range(n_partidas)):
+            self.state.reset()
+            self.state.is_game_over = False  # Asegúrate de que el estado del juego se reinicie correctamente
+            while not self.state.is_game_over:
+                action = self.agent.get_action(self.state)
+                self.state.update(action)
+            puntuaciones.append(len(self.state.snake))
+            movimientos.append(self.state.n_moviminetos)
+
+        estadisticas = {
+            "puntuacion_media": np.mean(puntuaciones),
+            "puntuacion_maxima": np.max(puntuaciones),
+            "puntuacion_minima": np.min(puntuaciones),
+            "movimientos_medios": np.mean(movimientos),
+            "movimientos_maximos": np.max(movimientos),
+            "movimientos_minimos": np.min(movimientos),
+            "movimientos por puntuacion": np.mean(movimientos) / np.mean(puntuaciones)
+        }
+
+        return estadisticas

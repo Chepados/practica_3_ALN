@@ -1,4 +1,3 @@
-from dependencias.Agentes.Base_Agent import Agent
 from abc import ABC, abstractmethod
 from random import choice
 
