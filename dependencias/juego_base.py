@@ -15,7 +15,6 @@ def clear_console():
     system('cls')
 
 class Game_state:
-
     ## Class to represent the state of the game
 
     def __init__(self, n_food, shape = (15, 17)):
@@ -24,6 +23,7 @@ class Game_state:
         self.reset()
         self.is_game_over = False
         self.n_moviminetos =  0
+        self.ate_food = False
 
     def generate_food(self):
 
@@ -56,7 +56,7 @@ class Game_state:
     def reset(self):
 
 
-        self.snake = [(0, 0)]
+        self.snake = [(((self.shape)[0]//2), ((self.shape)[1]//2))]
         self.direction = (1, 0)
         self.food_list = set()
         self.update_food_list()
@@ -121,10 +121,12 @@ class Game_state:
         # Gestionamos el avance y crecimiento de la serpiente
 
         if new_head in self.food_list:
+            self.ate_food = True
             self.snake = [new_head] + self.snake
             self.food_list.remove(new_head)
             self.update_food_list()
         else:
+            self.ate_food = False
             self.snake = [new_head] + self.snake[:-1]
 
         # Gestionamos la dirección de la serpiente
@@ -142,27 +144,27 @@ class Game_state:
             self.game_over()
 
     def state_matrix(self):
-
-        state_matrix = np.zeros(self.shape[0], self.shape[1])
-
-        dic_elementos = {
-            'espacio' : 0,
-            'comida' :  3,
-            'cabeza' :  2,
-            'cuerpo' :  1
-        }
-
+        # Número de canales: 4 (espacio libre, cuerpo, cabeza, comida)
+        channels = 4
+        state_matrix = np.zeros((channels, self.shape[0], self.shape[1]))
+        
+        # Definir índices de canales para cada elemento
+        CHANNEL_EMPTY = 0
+        CHANNEL_BODY = 1
+        CHANNEL_HEAD = 2
+        CHANNEL_FOOD = 3
+        
         for i in range(self.shape[0]):
             for j in range(self.shape[1]):
                 if (i, j) in self.food_list:
-                    state_matrix[i, j] = dic_elementos['comida']
-                elif (i, j) == self.snake[0]:
-                    state_matrix[i, j] = dic_elementos['cabeza']
-                elif (i, j) in self.snake[1:]:
-                    state_matrix[i, j] = dic_elementos['cuerpo']
-                else:
-                    state_matrix[i, j] = dic_elementos['espacio']
-
+                    state_matrix[CHANNEL_FOOD, i, j] = 1
+                if (i, j) == self.snake[0]:
+                    state_matrix[CHANNEL_HEAD, i, j] = 1
+                if (i, j) in self.snake[1:]:
+                    state_matrix[CHANNEL_BODY, i, j] = 1
+                if (i, j) not in self.food_list and (i, j) not in self.snake:
+                    state_matrix[CHANNEL_EMPTY, i, j] = 1
+        
         return state_matrix
 
 
