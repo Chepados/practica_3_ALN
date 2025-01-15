@@ -56,7 +56,7 @@ class Game_state:
     def reset(self):
 
 
-        self.snake = [(((self.shape)[0]//2), ((self.shape)[1]//2))]
+        self.snake = [(0, 0)]
         self.direction = (1, 0)
         self.food_list = set()
         self.update_food_list()
@@ -144,6 +144,29 @@ class Game_state:
             self.game_over()
 
     def state_matrix(self):
+        state_matrix = np.zeros((self.shape[0], self.shape[1]))
+
+        dic_elementos = {
+            'espacio' : 0,
+            'comida' :  3,
+            'cabeza' :  2,
+            'cuerpo' :  1
+        }
+
+        for i in range(self.shape[0]):
+            for j in range(self.shape[1]):
+                if (i, j) in self.food_list:
+                    state_matrix[i, j] = dic_elementos['comida']
+                elif (i, j) == self.snake[0]:
+                    state_matrix[i, j] = dic_elementos['cabeza']
+                elif (i, j) in self.snake[1:]:
+                    state_matrix[i, j] = dic_elementos['cuerpo']
+                else:
+                    state_matrix[i, j] = dic_elementos['espacio']
+
+        return state_matrix
+
+    def state_matrix_cnn(self):
         # Número de canales: 4 (espacio libre, cuerpo, cabeza, comida)
         channels = 4
         state_matrix = np.zeros((channels, self.shape[0], self.shape[1]))
@@ -166,8 +189,7 @@ class Game_state:
                     state_matrix[CHANNEL_EMPTY, i, j] = 1
         
         return state_matrix
-
-
+    
 class Snake_game:
     def __init__(self, size, n_food, agent):
         self.state = Game_state(n_food, size)
@@ -198,7 +220,7 @@ class Snake_game:
 
             screen.fill((0, 0, 0))
 
-            pygame.draw.rect(screen, (230, 54, 241),(self.state.snake[0][1] * cell_size, self.state.snake[0][0] * cell_size, cell_size, cell_size))
+            pygame.draw.rect(screen, (241, 173, 54),(self.state.snake[0][1] * cell_size, self.state.snake[0][0] * cell_size, cell_size, cell_size))
 
             for segment in self.state.snake[1:]:
                 pygame.draw.rect(screen, (241, 173, 54), (segment[1] * cell_size, segment[0] * cell_size, cell_size, cell_size))
