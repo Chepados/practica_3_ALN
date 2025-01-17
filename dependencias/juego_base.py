@@ -237,18 +237,27 @@ class Snake_game:
             "movimientos_medios": round(np.mean(movimientos), 2),
             "movimientos_maximos": np.max(movimientos),
             "movimientos_minimos": np.min(movimientos),
-            "movimientos por puntuacion": round(np.mean(movimientos) / np.mean(puntuaciones))
+            "movimientos por puntuacion": round(np.mean(movimientos) / np.mean(puntuaciones)),
+            "proporcion_del_tablero_ocupada" : round(len(self.state.snake) / (self.state.shape[0] * self.state.shape[1]), 2)
         }
 
         return estadisticas
 
 def enfrentar(a1, a2, n_partidas=100, size=(15, 15), n_food=5):
 
-    def return_with_highlights(v1, v2):
-        if v1 > v2:
-            return [f'((*{v1}*))', f'{v2}']
+    def return_with_highlights(v1, v2, reverse=False):
+
+        if reverse:
+            if v1 < v2:
+                return [f'((*{v1}*))', f'{v2}']
+            else:
+                return [f'{v1}', f'((*{v2}*))']
+
         else:
-            return [f'{v1}', f'((*{v2}*))']
+            if v1 > v2:
+                return [f'((*{v1}*))', f'{v2}']
+            else:
+                return [f'{v1}', f'((*{v2}*))']
 
     # Imprime una comparacion entre 2 agentes
     game_1 = Snake_game(size, n_food, a1)
@@ -263,7 +272,11 @@ def enfrentar(a1, a2, n_partidas=100, size=(15, 15), n_food=5):
     estaditicas = stats_1.keys()
 
     for i, stat in enumerate(estaditicas):
+
         v1, v2 = return_with_highlights(stats_1[stat], stats_2[stat])
+        if stat == 'movimientos por puntuacion':
+            v1, v2 = return_with_highlights(stats_1[stat], stats_2[stat], reverse=True)
+
         print(f"{stat:<30} | {v1:^15} | {v2:^15}")
 
     print(f"{'-' * 30} | {'-' * 15} | {'-' * 15}")
