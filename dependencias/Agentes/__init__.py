@@ -7,3 +7,5 @@ from dependencias.Agentes.Busqueda_anchura import *
 from dependencias.Agentes.Tail_Chasser import *
 from dependencias.Agentes.Filler import *
 from dependencias.Agentes.Cycle_detector import *
+from dependencias.Agentes.deep_q_agent import *
+from dependencias.Agentes.deep_q_agent_cnn import *
