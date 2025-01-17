@@ -1,6 +1,6 @@
 from dependencias.Agentes.Heuristic_Agent import Heuristic_Agent
 
-class Aantiloop(Heuristic_Agent):
+class Busqueda_anchura(Heuristic_Agent):
     ## Agent that tries to catch the food as soon as possible
 
     def __init__(self):

@@ -1,6 +1,4 @@
-from abc import ABC, abstractmethod
 from random import choice, random
-from time import sleep
 import numpy as np
 from IPython.display import clear_output
 from os import system
@@ -24,6 +22,7 @@ class Game_state:
         self.reset()
         self.is_game_over = False
         self.n_moviminetos =  0
+        self.has_won = False
 
     def generate_food(self):
 
@@ -108,7 +107,6 @@ class Game_state:
         # Suamos el movimiento que queremos hacer
         new_head = (self.snake[0][0] + move[0], self.snake[0][1] + move[1])
 
-
         # No podemos ir en la dirección contraria a la que vamos
 
         if len(self.snake) > 1 and (new_head[0] - self.snake[1][0], new_head[1] - self.snake[1][1]) == (-self.direction[0], -self.direction[1]):
@@ -121,6 +119,14 @@ class Game_state:
         # Gestionamos el avance y crecimiento de la serpiente
 
         if new_head in self.food_list:
+
+            #Miraos si hemos ganado
+
+            if len(self.snake) + 1 == self.shape[0] * self.shape[1]:
+                print("SENOLLOP HA GANADO GRACIAS POR JUGAR")
+                self.has_won = True
+                self.game_over()
+
             self.snake = [new_head] + self.snake
             self.food_list.remove(new_head)
             self.update_food_list()
@@ -225,13 +231,39 @@ class Snake_game:
             movimientos.append(self.state.n_moviminetos)
 
         estadisticas = {
-            "puntuacion_media": np.mean(puntuaciones),
+            "puntuacion_media": round(np.mean(puntuaciones), 2),
             "puntuacion_maxima": np.max(puntuaciones),
             "puntuacion_minima": np.min(puntuaciones),
-            "movimientos_medios": np.mean(movimientos),
+            "movimientos_medios": round(np.mean(movimientos), 2),
             "movimientos_maximos": np.max(movimientos),
             "movimientos_minimos": np.min(movimientos),
-            "movimientos por puntuacion": np.mean(movimientos) / np.mean(puntuaciones)
+            "movimientos por puntuacion": round(np.mean(movimientos) / np.mean(puntuaciones))
         }
 
         return estadisticas
+
+def enfrentar(a1, a2, n_partidas=100, size=(15, 15), n_food=5):
+
+    def return_with_highlights(v1, v2):
+        if v1 > v2:
+            return [f'((*{v1}*))', f'{v2}']
+        else:
+            return [f'{v1}', f'((*{v2}*))']
+
+    # Imprime una comparacion entre 2 agentes
+    game_1 = Snake_game(size, n_food, a1)
+    game_2 = Snake_game(size, n_food, a2)
+
+    stats_1 = game_1.evaluar(n_partidas)
+    stats_2 = game_2.evaluar(n_partidas)
+
+    print(f"{'Estadisticas':^30} | {'Agente 1':^15} | {'Agente 2':^15}")
+    print(f"{'-' * 30} | {'-' * 15} | {'-' * 15}")
+
+    estaditicas = stats_1.keys()
+
+    for i, stat in enumerate(estaditicas):
+        v1, v2 = return_with_highlights(stats_1[stat], stats_2[stat])
+        print(f"{stat:<30} | {v1:^15} | {v2:^15}")
+
+    print(f"{'-' * 30} | {'-' * 15} | {'-' * 15}")

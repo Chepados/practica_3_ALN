@@ -6,3 +6,4 @@ from dependencias.Agentes.Combined_Heuristic_Agent import *
 from dependencias.Agentes.Busqueda_anchura import *
 from dependencias.Agentes.Tail_Chasser import *
 from dependencias.Agentes.Filler import *
+from dependencias.Agentes.Cycle_detector import *
