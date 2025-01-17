@@ -88,7 +88,7 @@ def mover_bola():
     # Colisiones con las raquetas
     if bola.colliderect(raqueta_izquierda) or bola.colliderect(raqueta_derecha):
         velocidad_bola_x = -velocidad_bola_x
-
+        
     # Puntos cuando la bola sale por los laterales
     if bola.left <= 0:
         puntuacion_derecha += 1
