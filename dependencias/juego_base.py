@@ -263,7 +263,7 @@ class Snake_game:
             "movimientos_maximos": np.max(movimientos),
             "movimientos_minimos": np.min(movimientos),
             "movimientos por puntuacion": round(np.mean(movimientos) / np.mean(puntuaciones)),
-            "proporcion_del_tablero_ocupada" : round(len(self.state.snake) / (self.state.shape[0] * self.state.shape[1]), 2)
+            "proporcion_del_tablero_ocupada" : round(np.mean(puntuaciones) / (self.state.shape[0] * self.state.shape[1]), 2)
         }
 
         return estadisticas
