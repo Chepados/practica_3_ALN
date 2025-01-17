@@ -22,7 +22,7 @@ class Aantiloop(Heuristic_Agent):
                 for accion in POSIBLES_ACCIONES:
                     new_pos = (pos[0] + accion[0], pos[1] + accion[1])
                     if (0 <= new_pos[0] < state.shape[0]) and (0 <= new_pos[1] < state.shape[1]) and (
-                            new_pos not in state.snake) and (new_pos not in visited):
+                            new_pos not in state.snake[:-1]) and (new_pos not in visited):
                         queue.append(new_pos)
                         visited.add(new_pos)
 
@@ -43,7 +43,7 @@ class Aantiloop(Heuristic_Agent):
         lista_start_pos = [(cabeza[0] + movimiento[0], cabeza[1] + movimiento[1]) for movimiento in MOVIMIENTOS]
 
         for start_pos, movimiento in zip(lista_start_pos, MOVIMIENTOS):
-            if ((0 <= start_pos[0] < state.shape[0]) and (0 <= start_pos[1] < state.shape[1]) and (start_pos not in state.snake)):
+            if ((0 <= start_pos[0] < state.shape[0]) and (0 <= start_pos[1] < state.shape[1]) and (start_pos not in state.snake[:-1])):
                 self.rewards[movimiento] += count_BFS(start_pos)
 
         casillas_accesibles = sum(self.rewards.values())

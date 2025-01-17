@@ -24,13 +24,13 @@ class Avoid_inmediate_death(Heuristic_Agent):
 
         # Castigamos las acciones que nos llevan a chocar con la serpiente
 
-        if (head[0] + 1, head[1]) in state.snake:
+        if (head[0] + 1, head[1]) in state.snake[:-1]:
             self.rewards[(1, 0)] += PUNISHMENT
-        if (head[0] - 1, head[1]) in state.snake:
+        if (head[0] - 1, head[1]) in state.snake[:-1]:
             self.rewards[(-1, 0)] += PUNISHMENT
-        if (head[0], head[1] + 1) in state.snake:
+        if (head[0], head[1] + 1) in state.snake[:-1]:
             self.rewards[(0, 1)] += PUNISHMENT
-        if (head[0], head[1] - 1) in state.snake:
+        if (head[0], head[1] - 1) in state.snake[:-1]:
             self.rewards[(0, -1)] += PUNISHMENT
 
         # Castigamos las acciones que nos llevan a la pared

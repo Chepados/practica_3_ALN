@@ -198,8 +198,12 @@ class Snake_game:
 
             pygame.draw.rect(screen, (230, 54, 241),(self.state.snake[0][1] * cell_size, self.state.snake[0][0] * cell_size, cell_size, cell_size))
 
+            v = 0
+
             for segment in self.state.snake[1:]:
-                pygame.draw.rect(screen, (241, 173, 54), (segment[1] * cell_size, segment[0] * cell_size, cell_size, cell_size))
+                v += 1
+                #((241 - v) % 255, 173, (54 + v) % 255)
+                pygame.draw.rect(screen, ((241 - v) % 255, 173, (54 + v) % 255), (segment[1] * cell_size, segment[0] * cell_size, cell_size, cell_size))
             for food in self.state.food_list:
                 pygame.draw.rect(screen, (255, 0, 0), (food[1] * cell_size, food[0] * cell_size, cell_size, cell_size))
 
