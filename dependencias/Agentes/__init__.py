@@ -6,4 +6,3 @@ from dependencias.Agentes.Combined_Heuristic_Agent import *
 from dependencias.Agentes.Busqueda_anchura import *
 from dependencias.Agentes.deep_q_agent import *
 from dependencias.Agentes.deep_q_agent_cnn import *
-from dependencias.Agentes.deep_q_agent_8_neurons import *
