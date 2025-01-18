@@ -9,13 +9,14 @@ import numpy as np
 from collections import deque
 from IPython import display
 
-# Seed Initialization for Reproducibility
+# Inicialización de semillas para reproducibilidad
 random.seed(0)
 np.random.seed(0)
 torch.manual_seed(0)
 if torch.cuda.is_available():
     torch.cuda.manual_seed_all(0)
     
+# Creamos la clase Deep Q Network con PyTorch para el agente de Deep Q Learning.
 class DeepQNetworkN(nn.Module):
     def __init__(self, input_dim, hidden_dim, n_actions, learning_rate):
 
@@ -42,14 +43,14 @@ class DeepQNetworkN(nn.Module):
 
 class DQNAgentN:
     def __init__(self, gamma, epsilon, epsilon_min, epsilon_decay,  # Parámetros para el agente.
-                learning_rate, input_dim, hidden_dim, n_actions,    # Parámetros para la red neuronal.
+                learning_rate, input_dim, hidden_dim, n_actions,    # Parámetros para las redes neuronales.
                 batch_size, mem_size,                               # Parámetros para la memoria
                 target_update_freq=100,                             # Parámetros para el target network.
                 checkpoint_dir='checkpoints',                       # Directorio para guardar los checkpoints.
                 state_function = None):
         
         self.state_function = state_function
-        
+
         self.gamma = gamma
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min
@@ -75,18 +76,18 @@ class DQNAgentN:
         self.target_update_freq = target_update_freq
         self.update_target_network()
         
-        # Chekpoint
+        # Checkpoint
         self.checkpoint_dir = checkpoint_dir
         os.makedirs(self.checkpoint_dir, exist_ok=True)
         
-    def update_target_network(self):
+    def update_target_network(self):    # Actualizar la red target con los pesos de la q-evaluadora.
         self.q_target.load_state_dict(self.q_eval.state_dict())
 
-    def store_transition(self, state, action, reward, state_, done):
+    def store_transition(self, state, action, reward, state_, done):                # Para guardar en la memoria de experiencia.
         self.memory.append((state, action, reward, state_, done))
         self.step += 1
 
-    def choose_action(self, observation):
+    def choose_action(self, observation):                                           # Epsilon greedy para elegir la acción.
         if np.random.random() < self.epsilon:
             action = np.random.choice(self.action_space)
         else:
@@ -95,49 +96,49 @@ class DQNAgentN:
             action = torch.argmax(actions).item()
         return action
     
-    def get_action(self, state):
+    def get_action(self, state):                                                    # Para obtener la acción en forma de tupla (dx, dy).
         state_vector = self.state_function(state)
         action_chosen = self.choose_action(state_vector)
         action_conv = {0:(0, 1), 1:(0, -1), 2:(1, 0), 3:(-1, 0)}
         return action_conv[action_chosen]
     
-    def get_action_mem(self, action):
+    def get_action_mem(self, action):                                               # Para obtener la acción en forma de int.
         action_conv = {(0, 1):0, (0, -1):1, (1, 0):2, (-1, 0):3}
         return action_conv[action]
     
-    def update_epsilon(self):
+    def update_epsilon(self):                                                       # Para actualizar el valor de epsilon.
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
             self.epsilon = max(self.epsilon, self.epsilon_min)
             
-    def train(self):
+    def train(self):                                                                # Para entrenar el modelo.
         if len(self.memory) < self.batch_size:
             return None
         
-        batch = random.sample(self.memory, self.batch_size)
+        batch = random.sample(self.memory, self.batch_size)                         # Tomar una muestra aleatoria de la memoria.
         
-        states, actions, rewards, states_, dones = zip(*batch)
-        states = torch.tensor(states, dtype=torch.float).to(self.q_eval.device)
+        states, actions, rewards, states_, dones = zip(*batch)                      # Separar la muestra en sus componentes.
+        states = torch.tensor(states, dtype=torch.float).to(self.q_eval.device)     # Convertir a tensores.
         actions = torch.tensor(actions, dtype=torch.long).to(self.q_eval.device)
         rewards = torch.tensor(rewards, dtype=torch.float).to(self.q_eval.device)
         states_ = torch.tensor(states_, dtype=torch.float).to(self.q_eval.device)
         dones = torch.tensor(dones, dtype=torch.float).to(self.q_eval.device)
         
-        q_eval = self.q_eval(states).gather(1, actions.unsqueeze(-1)).squeeze(-1)
+        q_eval = self.q_eval(states).gather(1, actions.unsqueeze(-1)).squeeze(-1)   # Calcular Q(s, a).
         
-        with torch.no_grad():
-            q_next = self.q_target(states_).max(1)[0]
-        q_target = rewards + self.gamma * q_next * (1 - dones)
+        with torch.no_grad():                                                       # Calcular Q(s', a') para el target.
+            q_next = self.q_target(states_).max(1)[0] 
+        q_target = rewards + self.gamma * q_next * (1 - dones)                      # Calcular Q(s, a) target.
         
-        loss = self.q_eval.loss(q_target, q_eval).to(self.q_eval.device)
-        self.q_eval.optimizer.zero_grad()
-        loss.backward()
-        self.q_eval.optimizer.step()
+        loss = self.q_eval.loss(q_target, q_eval).to(self.q_eval.device)            # Calcular la pérdida.
+        self.q_eval.optimizer.zero_grad()                                           # Optimizar el modelo.
+        loss.backward()                                                             # Backpropagation.
+        self.q_eval.optimizer.step()                                                # Actualizar los pesos.                     
 
-        if self.step % self.target_update_freq == 0:
+        if self.step % self.target_update_freq == 0:                                # Actualizar la red target.
             self.update_target_network()
             
-    def save_checkpoint(self, episode, N, mean_score):
+    def save_checkpoint(self, episode, N, mean_score):                              # Guardar un checkpoint en el directorio especificado al crear el modelo.         
         checkpoint_path = os.path.join(self.checkpoint_dir, f'dqn{N}N_ep{episode}_sc{mean_score:.2f}.pth')
         torch.save({
             'episode': episode,
@@ -148,7 +149,7 @@ class DQNAgentN:
         }, checkpoint_path)
         print(f"Checkpoint saved at Episode {episode} with Mean Score {mean_score:.2f}")
     
-    def load_checkpoint(self, checkpoint_path):
+    def load_checkpoint(self, checkpoint_path):                                     # Cargar un checkpoint.
         if os.path.isfile(checkpoint_path):
             checkpoint = torch.load(checkpoint_path)
             self.q_eval.load_state_dict(checkpoint['model_state_dict'])
@@ -162,51 +163,51 @@ class DQNAgentN:
             
             
             
-def state_function_8n(game_state):
+def state_function_8n(game_state):                                                  # Función para convertir el estado a un input para la red neuronal de 8 neuronas.
     state_vector = np.zeros(8, dtype=float)
 
     head_x, head_y = game_state.snake[0]
 
-    # Directions: Up, Right, Down, Left
+    # Definir las direcciones
     directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
     
-    # Immediate danger
+    # Peligros
     for idx, (dx, dy) in enumerate(directions):
         next_x, next_y = head_x + dx, head_y + dy
-        # Check wall collision
+        # Mirar colisiones con las paredes
         if next_x < 0 or next_x >= game_state.shape[0] or next_y < 0 or next_y >= game_state.shape[1]:
             state_vector[idx] = 1.0
-        # Check self collision
+        # Mirar coliiones contigo mismo
         elif (next_x, next_y) in game_state.snake:
             state_vector[idx] = 1.0
         else:
             state_vector[idx] = 0.0
 
-    # Food direction
+    # Dirección de la comida en relación a la cabeza
     food_x, food_y = next(iter(game_state.food_list)) if game_state.food_list else (head_x, head_y)
     
     if food_x < head_x:
-        state_vector[4] = 1.0  # Food Up
+        state_vector[4] = 1.0                                                   # Comida arriba
     elif food_x > head_x:
-        state_vector[6] = 1.0  # Food Down
-    else:
+        state_vector[6] = 1.0                                                   # Comida abajo
+    else:                                                                       # Comida en la misma fila                       
         state_vector[4] = 0.0
         state_vector[6] = 0.0
-
-    if food_y < head_y:
-        state_vector[7] = 1.0  # Food Left
+                                                            
+    if food_y < head_y:                                                                  
+        state_vector[7] = 1.0                                                   # Comida a la izquierda
     elif food_y > head_y:
-        state_vector[5] = 1.0  # Food Right
-    else:
+        state_vector[5] = 1.0                                                   # Comida a la derecha
+    else:                                                                       # Comida en la misma columna
         state_vector[5] = 0.0
         state_vector[7] = 0.0
 
     return state_vector
 
-def state_function_15(game_state):
+def state_function_15(game_state):                                              # Función para convertir el estado a un input para la red neuronal de 15 neuronas.
     state_vector = []
 
-    # 1. Dangers: [front, right, left]
+    # 1. Peligros [3 neuronas]
     head_x, head_y = game_state.snake[0]
     current_direction = game_state.direction
 
@@ -232,7 +233,7 @@ def state_function_15(game_state):
         right = (0, 0)
         left = (0, 0)
 
-    # Verificar peligros en front, right y left
+    # Verificar peligros
     dangers = []
     for move in [front, right, left]:
         new_x = head_x + move[0]
@@ -246,17 +247,17 @@ def state_function_15(game_state):
             dangers.append(0)
     state_vector.extend(dangers)
 
-    # 2. Direction: [up, right, down, left]
+    # 2. Dirección actual [4 neuronas]
     directions = ['up', 'right', 'down', 'left']
     direction_vector = [1 if current_direction == dir else 0 for dir in directions]
     state_vector.extend(direction_vector)
 
-    # 3. Food Location: [left, right, up, down]
+    # 3. Dirección de la comida [4 neuronas]
     food_list = game_state.food_list
     if food_list:
         food_x, food_y = next(iter(food_list))
     else:
-        food_x, food_y = head_x, head_y  # Si no hay comida, la posición de la cabeza
+        food_x, food_y = head_x, head_y                                     # Si no hay comida, la posición de la cabeza
 
     food_left = 1 if food_y < head_y else 0
     food_right = 1 if food_y > head_y else 0
@@ -265,7 +266,7 @@ def state_function_15(game_state):
     food_direction = [food_left, food_right, food_up, food_down]
     state_vector.extend(food_direction)
 
-    # 4. Accessible Spaces: [left, right, up, down]
+    # 4. Distancia a la comida [4 neuronas]
 
     def count_BFS(start_pos):
         queue = deque([start_pos])
@@ -300,11 +301,11 @@ def state_function_15(game_state):
 
     return state_vector
 
-def state_big_matrix(game_state):
+def state_big_matrix(game_state):                                                   # Función para convertir el estado a un input para la red neuronal de shape[0]*shape[1] neuronas.
     return game_state.state_matrix().flatten()
 
 
-def plot_scores_function(scores, mean_scores, epsilons, id, neuronas):
+def plot_scores_function(scores, mean_scores, epsilons, id, neuronas):              # Función para plotear las estadísticas del entrenamiento.
     display.clear_output(wait=True)
     display.display(plt.gcf())
     plt.clf()
@@ -318,16 +319,17 @@ def plot_scores_function(scores, mean_scores, epsilons, id, neuronas):
     plt.ylim(ymin=0)
     plt.text(len(scores)-1, scores[-1], str(scores[-1]))
     plt.text(len(mean_scores)-1, mean_scores[-1], str(mean_scores[-1]))
-    plt.savefig(f'media/imagenes/rl/plots/dqn{neuronas}N_ep{id}_sc{mean_scores}.png')
+    mean = np.mean(mean_scores)
+    plt.savefig(f'media/imagenes/rl/plots/dqn{neuronas}N_ep{id}_sc{mean}.png')
     plt.show()
 
-def train_rl_agent(episodes, play_save_every, game, agent,state_function,
+def train_rl_agent(episodes, play_save_every, game, agent,state_function,               # Función para entrenar el agente.
                    n_games, total_score, plot_epsilons, plot_scores, plot_mean_scores):
     
-    for e in range(1, episodes+1):
+    for e in range(1, episodes+1):          
         n_games += 1
         state = game.state
-        state_vector = state_function(state)  # Use compact state
+        state_vector = state_function(state)  
         done = False
         
         while not done:
@@ -348,7 +350,7 @@ def train_rl_agent(episodes, play_save_every, game, agent,state_function,
                 reward = 0
                 
             # Guardar transición
-            next_state_vector = state_function(next_state)  # Use compact state
+            next_state_vector = state_function(next_state) 
             agent.store_transition(state_vector, action_mem, reward, next_state_vector, int(game.state.is_game_over))
             state_vector = next_state_vector
             
@@ -372,7 +374,7 @@ def train_rl_agent(episodes, play_save_every, game, agent,state_function,
                 print(f"Episode: {e}/{episodes}, Score: {score}, Epsilon: {agent.epsilon:.4}")
                 
                 
-                # Save Checkpoint
+                # Guardar checkpoint y jugar con pygame
                 if e % play_save_every == 0:
                     agent.save_checkpoint(episode=e, mean_score=mean_score, N=agent.input_dim)
                     game.state.reset()
@@ -382,6 +384,6 @@ def train_rl_agent(episodes, play_save_every, game, agent,state_function,
                     agent.epsilon = epsilon_actual
                     plot_scores_function(plot_scores, plot_mean_scores, plot_epsilons, id=e, neuronas=agent.input_dim)
                     
-                game.state.reset()
+                game.state.reset()  
                 done = True
                 
