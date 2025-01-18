@@ -1,2 +1,7 @@
-# practica_3_ALN
-Trabajo de algoritmica numerica in which we are going to explore reinforcement learning in common videogames implementend in python using the pygame library.
+# SENOLLOP
+<img src="media/imagenes/Banner.png" width = 1000>
+
+A partir de quizás uno de los videojuegos de la historia (Snake), se estudia:
+- El diseño algorítmico de estrategias óptimas en el juego.
+- Aprendizaje no supervisado.
+- Implementación de sistemas multiagente para simulación de entornos competitivos.
