@@ -41,12 +41,3 @@ class ChaserAgentMp(Heuristic_Agent_Mp):
             if abs(head[0] + accion[0] - best_food[0]) + abs(head[1] + accion[1] - best_food[1]) < min_distance:
                 self.rewards[accion] += REWARD
         
-
-        # Con tal de hacer el chaser un poco mas inteligente para pruebas (esto se debe hacer combinando agentes más adelante) 
-        for accion in acciones_posibles:
-            new_head = (head[0] + accion[0], head[1] + accion[1])
-            if 0 < new_head[0] < state.shape[0] and 0 < new_head[1] < state.shape[1]:
-                self.rewards[accion] += REWARD
-            
-            if new_head in state.bodies:
-                self.rewards[accion] -= 10
