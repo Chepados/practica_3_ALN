@@ -1,19 +1,12 @@
-<div style="text-align: center;">
-    <img src="media/imagenes/Banner.png" width="1000">
-    
-    <p style="max-width: 800px; margin: 20px auto; text-align: left;">
-        A partir de quizás uno de los videojuegos de la historia (<b>Snake</b>), se estudia:
-        <ul style="display: inline-block; text-align: left;">
-            <li>El diseño algorítmico de estrategias óptimas en el juego.</li>
-            <li>Aprendizaje no supervisado con <b>QLearning</b> y <b>Deep QLearning</b>.</li>
-            <li>Implementación de sistemas multiagente para simulación de entornos competitivos.</li>
-        </ul>
-    </p>
-    
-    <p style="max-width: 800px; margin: 20px auto; text-align: left;">
-        Este repositorio incluye todo el código con las implementaciones de todos los sistemas y un notebook 
-        que explica las decisiones de diseño que se han tomado durante la práctica.
-    </p>
+# SENOLLOP
+![Banner](media/imagenes/Banner.png)
 
-    <img src="media/imagenes/Logo.jpg" style="display: block; margin: auto;" width="200">
-</div>
+A partir de, quizás, uno de los videojuegos más icónicos de la historia (**Snake**), se estudia:
+
+- El diseño algorítmico de estrategias óptimas en el juego.
+- Aprendizaje no supervisado con **Q-Learning** y **Deep Q-Learning**.
+- Implementación de sistemas multiagente para la simulación de entornos competitivos.
+
+Este repositorio incluye todo el código con las implementaciones de todos los sistemas y un notebook que explica las decisiones de diseño tomadas durante la práctica.
+
+![Logo](media/imagenes/Logo.jpg)
